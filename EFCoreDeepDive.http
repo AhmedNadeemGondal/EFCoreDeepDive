@@ -1,0 +1,6 @@
+@EFCoreDeepDive_HostAddress = http://localhost:5134
+
+GET {{EFCoreDeepDive_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
