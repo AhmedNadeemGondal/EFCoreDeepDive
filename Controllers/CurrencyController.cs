@@ -26,10 +26,28 @@ namespace EFCoreDeepDive.Controllers
         }
 
         // Endpoint for demonstrating .FindAsync() LINQ
-        [HttpGet("{id:int}")]
+        [HttpGet("{id:int}")] // Addind type allows for the next query to be in a non-conflict as well
         public async Task<IActionResult> GetCurrencyByID([FromRoute(Name = "id")] int id)
         {
             var currency = await appDBContext.Currencies.FindAsync(id);
+
+            if (currency == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(currency);
+        }
+        [HttpGet("{name}")] // Can't do ':string' as routes are string by default, throws runtime errors
+        // Not a recommended routing scheme but good enough for focusing on EF Core and LINQ
+        public async Task<IActionResult> GetCurrencyByName([FromRoute(Name = "name")] string name)
+        {
+            //var currency = await appDBContext.Currencies.Where(x => x.Title == name).FirstOrDefaultAsync(); // This will scan the entire table
+            var currency = await appDBContext.Currencies.FirstOrDefaultAsync(x => x.Title == name); // This will return as soon as the first hit is found
+            // FirstAsync will throw an error if nothing is returned by the DB
+            // FIrstOrDefaultAsync will return Null if nothing is found.
+            // SingleAsync and SingleOrDefault have the above behaviour along with the added benefit/disadvantage
+            // of throwing an error if more than one record is returned by the DB.
 
             if (currency == null)
             {
