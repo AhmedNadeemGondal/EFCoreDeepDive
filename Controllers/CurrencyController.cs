@@ -65,9 +65,14 @@ namespace EFCoreDeepDive.Controllers
                                             [FromQuery(Name = "description")] string? description
                                                           )
         {
-            var currency = await appDBContext.Currencies.FirstOrDefaultAsync(
+            //var currency = await appDBContext.Currencies.FirstOrDefaultAsync(
+            //    x => 
+            //    x.Title == name &&  ( string.IsNullOrEmpty(description) ||x.Description == description));
+            var currency = await appDBContext.Currencies
+                .Where( // This creates the filter before the followng .ToListAsync
                 x => 
-                x.Title == name &&  ( string.IsNullOrEmpty(description) ||x.Description == description));
+                x.Title == name &&  ( string.IsNullOrEmpty(description) ||x.Description == description))
+                .ToListAsync();
 
             if (currency == null)
             {
