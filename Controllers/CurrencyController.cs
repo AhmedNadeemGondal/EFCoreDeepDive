@@ -82,6 +82,23 @@ namespace EFCoreDeepDive.Controllers
             return Ok(currency);
         }
 
+        [HttpPost("multipleids")]
+
+        public async Task<IActionResult> GetCurrencyByMultipleIds([FromBody] List<int> ids)
+        {
+            var currencies = await appDBContext.Currencies
+                .Where(x => ids.Contains(x.Id))
+                .ToListAsync();
+
+            if (currencies is null)
+            {
+                return NotFound();
+            }
+
+            return Ok(currencies);
+
+        }
+
 
 
     }
