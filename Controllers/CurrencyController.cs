@@ -42,8 +42,8 @@ namespace EFCoreDeepDive.Controllers
         // Not a recommended routing scheme but good enough for focusing on EF Core and LINQ
         public async Task<IActionResult> GetCurrencyByName([FromRoute(Name = "name")] string name)
         {
-            //var currency = await appDBContext.Currencies.Where(x => x.Title == name).FirstOrDefaultAsync(); // This will scan the entire table
-            var currency = await appDBContext.Currencies.FirstOrDefaultAsync(x => x.Title == name); // This will return as soon as the first hit is found
+            //var currency = await appDBContext.Currencies.Where(x => x.Title == name).FirstOrDefaultAsync(); 
+            var currency = await appDBContext.Currencies.FirstOrDefaultAsync(x => x.Title == name); // functionally identical to the above
             // FirstAsync will throw an error if nothing is returned by the DB
             // FIrstOrDefaultAsync will return Null if nothing is found.
             // SingleAsync and SingleOrDefault have the above behaviour along with the added benefit/disadvantage
@@ -56,6 +56,28 @@ namespace EFCoreDeepDive.Controllers
 
             return Ok(currency);
         }
+
+        // Query using multiple parameters
+        [HttpGet("multiple/{name}")]
+
+        public async Task<IActionResult> GetCurrencyByName(
+                                            [FromRoute(Name = "name")] string name,
+                                            [FromQuery(Name = "description")] string? description
+                                                          )
+        {
+            var currency = await appDBContext.Currencies.FirstOrDefaultAsync(
+                x => 
+                x.Title == name &&  ( string.IsNullOrEmpty(description) ||x.Description == description));
+
+            if (currency == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(currency);
+        }
+
+
 
     }
 }
