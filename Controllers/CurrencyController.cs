@@ -21,7 +21,11 @@ namespace EFCoreDeepDive.Controllers
             // schema and providing a layer of seperation offering flexibility.
             //var result = appDBContext.Currencies.ToList();  // Form 1 of LINQ
             var result = await (from currencies in appDBContext.Currencies // Form 2 of LINQ
-                                select currencies).ToListAsync();
+                                select new CurrencyDTO() // This will query only the selected columns
+                                {
+                                    CurrencyID = currencies.Id,
+                                    Name = currencies.Title,
+                                }).ToListAsync();
             return Ok(result);
         }
 
@@ -88,6 +92,11 @@ namespace EFCoreDeepDive.Controllers
         {
             var currencies = await appDBContext.Currencies
                 .Where(x => ids.Contains(x.Id))
+                .Select(s => new CurrencyDTO() // This will query only the selected columns
+                {
+                    CurrencyID = s.Id,
+                    Name = s.Title,
+                })
                 .ToListAsync();
 
             if (currencies is null)
