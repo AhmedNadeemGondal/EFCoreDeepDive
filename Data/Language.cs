@@ -13,5 +13,7 @@
         // but provides two way navigation.
         // This will blow if if JSONSERIALIZED.
         public ICollection<Book> Books { get; set; }
+
+ 
     }
 }

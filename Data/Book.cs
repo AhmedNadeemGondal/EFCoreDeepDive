@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace EFCoreDeepDive.Data
 {
@@ -22,6 +23,7 @@ namespace EFCoreDeepDive.Data
         [ForeignKey("LanguageId")] // This is explicit relationship assignment
         // This suggests taht one book can only have one language in this schema
         // This is a reference navigation property as it has a complex type
-        public Language Language { get; set; }
+        [JsonIgnore]
+        public Language? Language { get; set; }
     }
 }
