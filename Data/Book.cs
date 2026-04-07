@@ -25,5 +25,10 @@ namespace EFCoreDeepDive.Data
         // This is a reference navigation property as it has a complex type
         [JsonIgnore]
         public Language? Language { get; set; }
+
+        public int? AuthorId { get; set; }
+        [ForeignKey("AuthorId")]
+        [JsonIgnore]
+        public Author Author { get; set; }
     }
 }
