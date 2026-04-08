@@ -1,4 +1,5 @@
 ﻿using EFCoreDeepDive.Data;
+using EFCoreDeepDive.Data.DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

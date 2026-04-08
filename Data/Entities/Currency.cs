@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace EFCoreDeepDive.Data
+namespace EFCoreDeepDive.Data.Entities
 
 {
     public class Currency

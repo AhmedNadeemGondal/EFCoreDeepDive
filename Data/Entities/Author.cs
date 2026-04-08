@@ -1,4 +1,4 @@
-﻿namespace EFCoreDeepDive.Data
+﻿namespace EFCoreDeepDive.Data.Entities
 {
     public class Author
     {

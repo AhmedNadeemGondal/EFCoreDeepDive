@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace EFCoreDeepDive.Data
+namespace EFCoreDeepDive.Data.Entities
 
 {
     public class BookPrice

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using EFCoreDeepDive.Data.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace EFCoreDeepDive.Data
 

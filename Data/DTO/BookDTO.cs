@@ -1,4 +1,6 @@
-﻿namespace EFCoreDeepDive.Data
+﻿using EFCoreDeepDive.Data.Entities;
+
+namespace EFCoreDeepDive.Data.DTO
 {
     public class BookDTO
     {

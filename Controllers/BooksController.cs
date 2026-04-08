@@ -1,4 +1,6 @@
 ﻿using EFCoreDeepDive.Data;
+using EFCoreDeepDive.Data.DTO;
+using EFCoreDeepDive.Data.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -62,5 +64,28 @@ namespace EFCoreDeepDive.Controllers
 
             return Ok($"{bookEntities.Count} books added successfully.");
         }
+        [HttpPut("{id}")] // getting the id seperate is a best practice
+        public async Task<IActionResult> UpdateBook([FromRoute(Name ="id")] int bookId, [FromBody] UpdateBookDTO bookDto)
+        {
+
+            var bookEntity = await appDBContext.Books.FirstOrDefaultAsync(x => x.Id == bookId);
+            if (bookEntity == null)
+            {
+                return NotFound();
+            }
+            // This is the 'Property-by-Property' update logic.
+            if (bookDto.Title != null) bookEntity.Title = bookDto.Title;
+            if (bookDto.Description != null) bookEntity.Description = bookDto.Description;
+            if (bookDto.NoOfPages.HasValue) bookEntity.NoOfPages = bookDto.NoOfPages.Value;
+            if (bookDto.IsActive.HasValue) bookEntity.IsActive = bookDto.IsActive.Value;
+            if (bookDto.LanguageId.HasValue) bookEntity.LanguageId = bookDto.LanguageId.Value;
+
+            //appDBContext.Books.Add(bookEntity);// This will break this flow as it is not required
+                                                 // we are not creating a record, only updating the in-memory entity
+                                                 // and the tracker
+            await appDBContext.SaveChangesAsync(); // This will generate and forward required SQL to the DB
+            return Ok($"{bookEntity.Title} updated successfully.");
+        }
+
     }
 }
