@@ -64,6 +64,7 @@ namespace EFCoreDeepDive.Controllers
 
             return Ok($"{bookEntities.Count} books added successfully.");
         }
+
         [HttpPut("{id}")] // getting the id seperate is a best practice
         public async Task<IActionResult> UpdateBook([FromRoute(Name ="id")] int bookId, [FromBody] UpdateBookDTO bookDto)
         {
@@ -84,6 +85,10 @@ namespace EFCoreDeepDive.Controllers
                                                  // we are not creating a record, only updating the in-memory entity
                                                  // and the tracker
             await appDBContext.SaveChangesAsync(); // This will generate and forward required SQL to the DB
+            //await appDBContext.UpdateAsync(bookEntity); // There are scenarios where update can be used as well
+                                                          // This will work as the entry state is modified and
+                                                          // tracked by the change tracker !!! See example below !!!
+            //appDBContext.Entry(bookEntity).State = EntityState.Modified; // manually modifying the ENUM
             return Ok($"{bookEntity.Title} updated successfully.");
         }
 
