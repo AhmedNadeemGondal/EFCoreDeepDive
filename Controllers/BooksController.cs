@@ -1,7 +1,6 @@
 ﻿using EFCoreDeepDive.Data;
 using EFCoreDeepDive.Data.DTO;
 using EFCoreDeepDive.Data.Entities;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,7 +11,7 @@ namespace EFCoreDeepDive.Controllers
     public class BooksController(AppDBContext appDBContext) : ControllerBase
     {
         [HttpPost("")]
-        public async Task<IActionResult> AddNewBook([FromBody] BookDTO bookDto)
+        public async Task<IActionResult> AddNewBookAsync([FromBody] BookDTO bookDto)
         {
             // The Mapping Logic
             var bookEntity = new Book
@@ -39,7 +38,7 @@ namespace EFCoreDeepDive.Controllers
         }
 
         [HttpPost("bulk")]
-        public async Task<IActionResult> AddNewBooks([FromBody] List<BookDTO> bookDtos)
+        public async Task<IActionResult> AddNewBooksAsync([FromBody] List<BookDTO> bookDtos)
         {
             if (bookDtos == null || !bookDtos.Any())
             {
@@ -60,13 +59,13 @@ namespace EFCoreDeepDive.Controllers
 
             // Add the entire collection to the Change Tracker
             appDBContext.Books.AddRange(bookEntities); // This will result in a single SQL operation
-            await appDBContext.SaveChangesAsync(); 
+            await appDBContext.SaveChangesAsync();
 
             return Ok($"{bookEntities.Count} books added successfully.");
         }
 
         [HttpPut("{id}")] // getting the id seperate is a best practice
-        public async Task<IActionResult> UpdateBook([FromRoute(Name ="id")] int bookId, [FromBody] UpdateBookDTO bookDto)
+        public async Task<IActionResult> UpdateBook([FromRoute(Name = "id")] int bookId, [FromBody] UpdateBookDTO bookDto)
         {
 
             var bookEntity = await appDBContext.Books.FirstOrDefaultAsync(x => x.Id == bookId);
@@ -82,29 +81,70 @@ namespace EFCoreDeepDive.Controllers
             if (bookDto.LanguageId.HasValue) bookEntity.LanguageId = bookDto.LanguageId.Value;
 
             //appDBContext.Books.Add(bookEntity);// This will break this flow as it is not required
-                                                 // we are not creating a record, only updating the in-memory entity
-                                                 // and the tracker
+            // we are not creating a record, only updating the in-memory entity
+            // and the tracker
             await appDBContext.SaveChangesAsync(); // This will generate and forward required SQL to the DB
-            //await appDBContext.UpdateAsync(bookEntity); // There are scenarios where update can be used as well
-                                                          // This will work as the entry state is modified and
-                                                          // tracked by the change tracker !!! See example below !!!
-            //appDBContext.Entry(bookEntity).State = EntityState.Modified; // manually modifying the ENUM
+                                                   //await appDBContext.UpdateAsync(bookEntity); // There are scenarios where update can be used as well
+                                                   // This will work as the entry state is modified and
+                                                   // tracked by the change tracker !!! See example below !!!
+                                                   //appDBContext.Entry(bookEntity).State = EntityState.Modified; // manually modifying the ENUM
             return Ok($"{bookEntity.Title} updated successfully.");
         }
 
         [HttpPut("bulk")] // getting the id seperate is a best practice
-        public async Task<IActionResult> UpdateBooksInBulk()
+        public async Task<IActionResult> UpdateBooksInBulkAsync()
         {
             await appDBContext.Books
                 .Where(x => x.NoOfPages > 100)
                 .ExecuteUpdateAsync // This generates a query and sends directly to the DB
                                     // No entity exists in this method.
                 (x => x
-            .SetProperty(p => p.Description,p => p.Title + " More than 100 pages")
-            .SetProperty(p=> p.Title, p => p.Title + " updated more than 100 pages")
+            .SetProperty(p => p.Description, p => p.Title + " More than 100 pages")
+            .SetProperty(p => p.Title, p => p.Title + " updated more than 100 pages")
             );
 
             return Ok("Bulk update succeded.");
+        }
+
+        [HttpDelete("{id}")] // getting the id seperate is a best practice
+        public async Task<IActionResult> DeleteBookById([FromRoute(Name = "id")] int id)
+        {
+            //var bookToDelete = await appDBContext.Books.FirstOrDefaultAsync(x => x.Id == id);
+            //if (bookToDelete != null)
+            //{
+            //    appDBContext.Books.Remove(bookToDelete);
+            //    await appDBContext.SaveChangesAsync();
+            //    return Ok("Book deleted succeded.");
+
+            //}
+
+            //return NotFound("Book not found");
+
+            var book = new Book { Id = id };
+            appDBContext.Entry(book).State = EntityState.Deleted;
+            await appDBContext.SaveChangesAsync();
+
+            return Ok("Book deleted succeded.");
+        }
+
+        [HttpDelete("bulk")] // getting the id seperate is a best practice
+        public async Task<IActionResult> DeleteBookInBulkAsync([FromRoute(Name = "id")] int id)
+        {
+
+            var booksToDelete = await appDBContext.Books.Where(x => x.Id < 5).ToListAsync();
+            if (booksToDelete != null)
+            {
+                appDBContext.Books.RemoveRange(booksToDelete); // This will generate a query for each record deletion
+                await appDBContext.SaveChangesAsync();
+
+                //var books = await appDBContext.Books.ExecuteDeleteAsync(); deletes everything with a single query
+                return Ok("Book deleted succeded.");
+
+            }
+
+
+
+            return NotFound("Book not found");
         }
 
     }
