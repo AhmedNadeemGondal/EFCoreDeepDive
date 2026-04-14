@@ -26,7 +26,9 @@ namespace EFCoreDeepDive.Controllers
                                 {
                                     CurrencyID = currencies.Id,
                                     Name = currencies.Title,
-                                }).ToListAsync();
+                                })
+                                .AsNoTracking() // By passes EF core tracking, making query lightweight on the backend
+                                .ToListAsync();
             return Ok(result);
         }
 
