@@ -15,7 +15,9 @@ namespace EFCoreDeepDive
             // These are the options that will be instantiated and passed to the DbContext
             // by the DI container when required.
             builder.Services.AddDbContext<AppDBContext>(options =>
-            options.UseSqlServer(builder.Configuration.GetConnectionString("AppDb")));
+            options.UseSqlServer(builder.Configuration.GetConnectionString("AppDb"))
+            .LogTo(Console.WriteLine) // Log every DB hit to Kestral console
+            );
 
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

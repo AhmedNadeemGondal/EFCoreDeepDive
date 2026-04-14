@@ -92,5 +92,20 @@ namespace EFCoreDeepDive.Controllers
             return Ok($"{bookEntity.Title} updated successfully.");
         }
 
+        [HttpPut("bulk")] // getting the id seperate is a best practice
+        public async Task<IActionResult> UpdateBooksInBulk()
+        {
+            await appDBContext.Books
+                .Where(x => x.NoOfPages > 100)
+                .ExecuteUpdateAsync // This generates a query and sends directly to the DB
+                                    // No entity exists in this method.
+                (x => x
+            .SetProperty(p => p.Description,p => p.Title + " More than 100 pages")
+            .SetProperty(p=> p.Title, p => p.Title + " updated more than 100 pages")
+            );
+
+            return Ok("Bulk update succeded.");
+        }
+
     }
 }
