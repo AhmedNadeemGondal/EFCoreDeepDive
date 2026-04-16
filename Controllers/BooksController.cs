@@ -10,6 +10,26 @@ namespace EFCoreDeepDive.Controllers
     [ApiController]
     public class BooksController(AppDBContext appDBContext) : ControllerBase
     {
+        [HttpGet("all")]
+        public async Task<IActionResult> GetAllBooksAsync()
+        {
+            var books = await appDBContext.Books
+                .Select(x => new BookDTO
+                // Book is being mapped to BookDTO manually
+                {
+                    Title = x.Title,
+                    LanguageId = x.LanguageId,
+                    IsActive = x.IsActive,
+                    Description = x.Description,
+                    NoOfPages = x.NoOfPages,
+                    Language = x.Language,
+                    Author = x.Author != null ? x.Author: null // This is a class, so will add a complete object
+                })
+                
+                .AsNoTracking().ToListAsync();
+            return Ok(books);
+        }
+
         [HttpPost("")]
         public async Task<IActionResult> AddNewBookAsync([FromBody] BookDTO bookDto)
         {

@@ -9,6 +9,7 @@ namespace EFCoreDeepDive.Data.DTO
         public int NoOfPages { get; set; }
         public bool IsActive { get; set; }
         public int LanguageId { get; set; }
+        public Language? Language { get; set; }
         public Author? Author { get; set; }
     }
 }
