@@ -10,8 +10,8 @@ namespace EFCoreDeepDive.Controllers
     [ApiController]
     public class BooksController(AppDBContext appDBContext) : ControllerBase
     {
-        [HttpGet("all")]
-        public async Task<IActionResult> GetAllBooksAsync()
+        [HttpGet("allUsingProjection")] // Projection based mapping using .Select
+        public async Task<ActionResult<List<BookDTO>>> GetAllBooksAsync()
         {
             var books = await appDBContext.Books
                 .Select(x => new BookDTO
@@ -28,6 +28,33 @@ namespace EFCoreDeepDive.Controllers
                 
                 .AsNoTracking().ToListAsync();
             return Ok(books);
+        }
+
+        [HttpGet("allEagerLoad")] // Eager loading based mapping using .Include
+        public async Task<ActionResult<List<BookDTO>>> GetAllBooksEagerAsync()
+        {
+            // Eager Loading happens here
+            var books = await appDBContext.Books
+                .Include(x => x.Language) // This will introduce infinite nesting if books
+                                          // is passed to the Ok() method which trigerr the
+                                          // JSONserializer
+                .Include(x => x.Author)
+                .AsNoTracking()
+                .ToListAsync();
+
+            // Mapping happens in memory AFTER the data is fetched
+            var bookDTOs = books.Select(x => new BookDTO
+            {
+                Title = x.Title,
+                Description = x.Description,
+                NoOfPages = x.NoOfPages,
+                IsActive = x.IsActive,
+                LanguageId = x.LanguageId,
+                Language = x.Language, // Already loaded via .Include
+                Author = x.Author     // Already loaded via .Include
+            }).ToList();
+
+            return Ok(bookDTOs);
         }
 
         [HttpPost("")]
