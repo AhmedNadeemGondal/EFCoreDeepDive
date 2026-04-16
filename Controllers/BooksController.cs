@@ -10,6 +10,23 @@ namespace EFCoreDeepDive.Controllers
     [ApiController]
     public class BooksController(AppDBContext appDBContext) : ControllerBase
     {
+        [HttpGet("")]
+        public async Task<IActionResult> GetOneBookAsync()
+        {
+
+            var book = await appDBContext.Books.FirstAsync();
+
+            await appDBContext.Entry(book).Reference(x => x.Language).LoadAsync(); 
+            await appDBContext.Entry(book).Reference(x => x.Author).LoadAsync();
+
+            // If the navigation in the reference class is not JSONIgnore(d),
+            // will cause serialization error. Better to use a mapper and a DTO
+            // to decouple the EF core change tracker and the JSONSerializer producing
+            // the outgoing data.
+           return Ok(book);
+        }
+
+
         [HttpGet("allUsingProjection")] // Projection based mapping using .Select
         public async Task<ActionResult<List<BookDTO>>> GetAllBooksAsync()
         {
@@ -23,9 +40,9 @@ namespace EFCoreDeepDive.Controllers
                     Description = x.Description,
                     NoOfPages = x.NoOfPages,
                     Language = x.Language,
-                    Author = x.Author != null ? x.Author: null // This is a class, so will add a complete object
+                    Author = x.Author != null ? x.Author : null // This is a class, so will add a complete object
                 })
-                
+
                 .AsNoTracking().ToListAsync();
             return Ok(books);
         }
@@ -69,7 +86,9 @@ namespace EFCoreDeepDive.Controllers
                 IsActive = bookDto.IsActive,
                 LanguageId = bookDto.LanguageId,
                 //Language = null, This is not needed as the Navigation logic 
-                // kicks in and fills this part based on the LanguageId
+                // kicks in and fills this part based on the LanguageId. If the provided
+                // languageId is present in the language table, it will be added as a reference
+                // to the Book row, otherwise it will be a null pointer.
                 CreatedOn = DateTime.UtcNow, // Server-side logic
                 Author = bookDto.Author!
             };

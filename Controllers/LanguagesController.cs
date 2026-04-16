@@ -15,11 +15,26 @@ namespace EFCoreDeepDive.Controllers
         {
             var language = await appDBContext.Languages
                 .Include(x => x.Books) // This will generate the quey for the Books navigation join
-                                       // This is eager loading
+                                       // This is eager loading, navigation does not work without this
                 .AsNoTracking()
                 .ToListAsync();
 
+
             return Ok(language);
+        }
+
+        [HttpGet("allExplicit")] // Needs manipulating JSONIgnore in Book and language classes respectively
+        public async Task<IActionResult> GetAllBooksExplicitAsync()
+        {
+            var languages = await appDBContext.Languages.ToListAsync();
+
+            foreach (var language in languages)
+            {
+                await appDBContext.Entry(language).Collection(x => x.Books).LoadAsync();
+            }
+
+
+            return Ok(languages);
         }
     }
 }
