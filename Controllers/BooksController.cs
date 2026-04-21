@@ -101,10 +101,6 @@ namespace EFCoreDeepDive.Controllers
         [HttpGet("sqlStoredProcedure")]
         public async Task<ActionResult<Book>> GetBookSQLStoredAsync()
         {
-            // Simple example
-            //var books = await appDBContext.Books.FromSql($"select * from Books").ToListAsync();
-            //return Ok(books);
-
 
             var parameter = new SqlParameter("@BookId", 2);
 
@@ -112,8 +108,18 @@ namespace EFCoreDeepDive.Controllers
                 .FromSql($"EXEC SP_GetBookById {parameter}")
                 .FirstOrDefaultAsync();
 
-
            return Ok(book);
+        }
+
+        [HttpGet("directSqlQuery")]
+        public async Task<ActionResult> SQLQueryAsync()
+        {
+            // The SqlQuery method does not allow sending changes to DB
+            //var bookIds = await appDBContext.Database.SqlQuery<int>($"select Id from dbo.books").ToListAsync();
+
+            var update = await appDBContext.Database.ExecuteSqlAsync($"UPDATE dbo.Books SET NoOfPages = 1000 WHERE Id = 1");
+
+           return Ok(update);
         }
 
         [HttpPost("")]
