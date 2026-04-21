@@ -2,6 +2,7 @@
 using EFCoreDeepDive.Data.DTO;
 using EFCoreDeepDive.Data.Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace EFCoreDeepDive.Controllers
@@ -72,6 +73,47 @@ namespace EFCoreDeepDive.Controllers
             }).ToList();
 
             return Ok(bookDTOs);
+        }
+
+        [HttpGet("sql")]
+        public async Task<ActionResult<Book>> GetBookSQLAsync()
+        {
+            // Simple example
+            //var books = await appDBContext.Books.FromSql($"select * from Books").ToListAsync();
+            //return Ok(books);
+
+            var columnName = "Id";
+            var columnValue = "1";
+
+            var parameter = new SqlParameter("columnValue", columnValue);
+
+            var books1 = await appDBContext.Books  // Secure
+                .FromSql($"select * from Books where {columnName} = {columnValue}")
+                .FirstOrDefaultAsync();
+
+            var books2 = await appDBContext.Books  // Not secure, will expose all tables to the client
+                .FromSqlRaw($"select * from Books where {columnName} = @columnValue", parameter)
+                .FirstOrDefaultAsync();
+
+           return Ok(books2);
+        }
+
+        [HttpGet("sqlStoredProcedure")]
+        public async Task<ActionResult<Book>> GetBookSQLStoredAsync()
+        {
+            // Simple example
+            //var books = await appDBContext.Books.FromSql($"select * from Books").ToListAsync();
+            //return Ok(books);
+
+
+            var parameter = new SqlParameter("@BookId", 2);
+
+            var book = await appDBContext.Books
+                .FromSql($"EXEC SP_GetBookById {parameter}")
+                .FirstOrDefaultAsync();
+
+
+           return Ok(book);
         }
 
         [HttpPost("")]
